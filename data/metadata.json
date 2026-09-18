@@ -1,0 +1,10 @@
+{
+  "seed": 2026,
+  "d": 16,
+  "k": 32,
+  "train_size": 100000,
+  "val_size": 5000,
+  "test_size": 5000,
+  "x_distribution": "N(0, I)",
+  "w_distribution": "N(0, I/d)"
+}
