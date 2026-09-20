@@ -13,5 +13,5 @@ class RMSNorm(nn.Module):
 
         rms = torch.rsqrt(x.pow(2).mean(-1,keepdim=True)+self.eps)
         x = x * rms 
-        return x.to(input_dtype)*self.weight
+        return x.to(input_dtype)*self.weight.to(input_dtype)
     
