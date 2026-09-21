@@ -10,6 +10,19 @@ conda activate simpleloop
 pip install -r requirements.txt
 ```
 
+## 一键跑完全部实验
+
+```bash
+conda activate simpleloop
+nohup ./run_all.sh > outputs/run_all.log 2>&1 &
+```
+
+串行执行：数据 → 训练 7 个 run → 评测 → 消融汇总 → 出图，约 6.5 小时。
+
+- 已存在 `outputs/<run>/checkpoints/best.pt` 的训练自动跳过，**中断后直接重跑即可续上**
+- `./run_all.sh --force` 忽略已有 checkpoint 全部重跑
+- 收尾会列出失败的步骤；只要有一个失败，退出码为 1
+
 ## 数据
 
 ```bash
