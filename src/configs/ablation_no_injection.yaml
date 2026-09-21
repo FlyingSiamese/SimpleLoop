@@ -1,0 +1,45 @@
+seed: 2026
+
+data:
+  d: 16
+  k: 32
+  train_size: 100000
+  val_size: 5000
+  test_size: 5000
+
+model:
+  hidden_size: 256
+  loop_layers: 2
+  baseline_layers: 16
+  num_heads: 8
+  ffn_hidden_size: 1024
+  norm: rmsnorm
+  ffn: swiglu
+  rope: true
+  dropout: 0.0
+
+loop:
+  train_loops: 8
+  loss_window: 4
+  input_injection: false
+  truncated_bptt: false
+
+training:
+  batch_size: 256
+  optimizer: adamw
+  lr: 0.0002 
+  betas: [0.9,0.95]
+  weight_decay: 0.01
+  warmup_steps: 500
+  scheduler: cosine
+  max_steps: 20000
+  grad_clip: 1.0
+  precision: bf16
+  eval_every: 500
+  save_every: 1000
+
+evaluation:
+  max_eval_loops: 32
+  context_lengths: [1,2,4,8,16,32]
+  scaling_factors: [0.5,1.0,2.0,3.0]
+  noise_sigmas: [0.0,0.1,0.3,0.5]
