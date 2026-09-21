@@ -112,6 +112,9 @@ def train(cfg, model, run_name, config_path, resume=None):
     amp_dtype = torch.bfloat16 if use_bf16 else torch.float32
     print(f"精度     : {'bf16 autocast' if use_bf16 else 'fp32'}")
 
+    # 短跑也要有曲线：logging 间隔随总步数自适应
+    log_every = max(1, min(LOG_EVERY, cfg.training.max_steps // 20))
+
     # 模型自己的 loop 数与 loss window：looped=(8,4)，baseline=(1,1)
     num_loops = model.train_loops
     window = model.loss_window
@@ -150,7 +153,7 @@ def train(cfg, model, run_name, config_path, resume=None):
             running_n += 1
             step += 1
 
-            if step % LOG_EVERY == 0:
+            if step % log_every == 0:
                 elapsed = time.time() - t0
                 logger.log({
                     "step": step,
