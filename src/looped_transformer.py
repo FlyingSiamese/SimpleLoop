@@ -50,7 +50,7 @@ class LoopedTransformer(nn.Module):
 
         return torch.cat([prompt,eq.unsqueeze(1)],dim=1)
 
-    def forward(self,x,y,num_loops=None):
+    def forward(self, x, y, num_loops=None, truncated_bptt=False):
         if num_loops is None:
             num_loops=self.train_loops
 
@@ -62,8 +62,13 @@ class LoopedTransformer(nn.Module):
         else:
             H = P
 
+        # 计划第 27 节：前 b-T 轮不保留计算图
+        cut = num_loops - self.loss_window
+
         predictions = []
-        for _ in range(num_loops):
+        for t in range(num_loops):
+            if truncated_bptt and t == cut:
+                H = H.detach()
             if self.input_injection:
                 H = self.stack(H+P,cos,sin)
             else:
