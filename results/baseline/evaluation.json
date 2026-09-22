@@ -1,0 +1,48 @@
+{
+  "run_name": "baseline",
+  "architecture": "baseline",
+  "checkpoint": "outputs/baseline/checkpoints/best.pt",
+  "num_parameters": 16790785,
+  "num_eval_loops": 1,
+  "mse_by_loop": [
+    0.020197905600070953
+  ],
+  "metrics_at_final_loop": {
+    "mse": 0.020197903931388247,
+    "rmse": 0.14211932990057421,
+    "mae": 0.10650602929592133,
+    "r2": 0.9799879255355696
+  },
+  "least_squares": {
+    "mse": 1.0129640307977861e-13,
+    "rmse": 3.1827095858682833e-07,
+    "mae": 2.401207573711872e-07,
+    "r2": 0.9999999999998996
+  },
+  "context_length": {
+    "1": {
+      "model_mse": 0.9676782488822937,
+      "least_squares_mse": 0.9467036128044128
+    },
+    "2": {
+      "model_mse": 0.9210946559906006,
+      "least_squares_mse": 0.8897385001182556
+    },
+    "4": {
+      "model_mse": 0.7917431592941284,
+      "least_squares_mse": 0.7611446976661682
+    },
+    "8": {
+      "model_mse": 0.535505473613739,
+      "least_squares_mse": 0.5046514868736267
+    },
+    "16": {
+      "model_mse": 0.14376746118068695,
+      "least_squares_mse": 5.655858892339438e-09
+    },
+    "32": {
+      "model_mse": 0.020197905600070953,
+      "least_squares_mse": 1.0129639233533508e-13
+    }
+  }
+}
