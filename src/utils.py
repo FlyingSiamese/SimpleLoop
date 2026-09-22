@@ -41,13 +41,15 @@ def environment_info():
     }
 
 
-def to_loop_predictions(out):
-    """统一成 [num_loops, B]。
+def to_loop_predictions(out, ndim=2):
+    """补上 loop 维，让 baseline 和 looped 的返回形状一致。
 
-    LoopedTransformer 返回 [num_loops, B]；BaselineTransformer 返回 [B]
-    （它没有 loop 维度），补一个长度 1 的维度后两者接口一致。
+    LoopedTransformer 返回 [num_loops, B]（或 [num_loops, B, k+1]）；
+    BaselineTransformer 返回 [B]（或 [B, k+1]），缺一个 loop 维。
     """
-    return out.unsqueeze(0) if out.dim() == 1 else out
+    while out.dim() < ndim:
+        out = out.unsqueeze(0)
+    return out
 
 
 def save_json(obj, path):

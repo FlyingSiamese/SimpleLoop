@@ -50,7 +50,9 @@ class LoopedTransformer(nn.Module):
 
         return torch.cat([prompt,eq.unsqueeze(1)],dim=1)
 
-    def forward(self, x, y, num_loops=None, truncated_bptt=False):
+    def forward(self, x, y, num_loops=None, truncated_bptt=False, all_positions=False):
+        """all_positions=True 时返回 [num_loops, B, k+1]，即论文 Eq.1 的 k+1 个 prompt 前缀；
+        否则只返回最后一个 query 的输出 [num_loops, B]。"""
         if num_loops is None:
             num_loops=self.train_loops
 
@@ -73,7 +75,13 @@ class LoopedTransformer(nn.Module):
                 H = self.stack(H+P,cos,sin)
             else:
                 H = self.stack(H,cos,sin)
-            h_q = self.final_norm(H[:,-1])
-            predictions.append(self.output_head(h_q).squeeze(-1))
+            if all_positions:
+                # 偶数位置 = Ex(x1), Ex(x2), ..., Ex(xq)，恰好 k+1 个 prompt 前缀，
+                # 与 target y[:, 0..k] 一一对应
+                h = self.final_norm(H[:, ::2])
+                predictions.append(self.output_head(h).squeeze(-1))
+            else:
+                h_q = self.final_norm(H[:,-1])
+                predictions.append(self.output_head(h_q).squeeze(-1))
 
         return torch.stack(predictions)

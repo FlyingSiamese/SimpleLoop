@@ -129,23 +129,26 @@ def train(cfg, model, run_name, config_path, resume=None):
             if step >= cfg.training.max_steps:
                 break
             x, y = x.to(device), y.to(device)
-            target = y[:, -1]
+            k_ctx = x.shape[1] - 1
 
             with torch.autocast(device_type=device.type, dtype=amp_dtype,
                                 enabled=use_bf16):
+                # 计划第 10 节：监督 k+1 个 prompt 前缀，target 就是整条 y
                 preds = to_loop_predictions(model(
                     x, y, num_loops=num_loops,
-                    truncated_bptt=cfg.loop.truncated_bptt))
-                loss = loop_window_loss(preds, target, window)
+                    truncated_bptt=cfg.loop.truncated_bptt,
+                    all_positions=True), ndim=3)
+                loss = loop_window_loss(preds, y, window)
 
             # 形状断言：广播不会报错，只能主动检查
-            assert preds.shape == (num_loops, x.shape[0]), \
-                f"predictions {tuple(preds.shape)} != ({num_loops}, {x.shape[0]})"
+            assert preds.shape == (num_loops, x.shape[0], k_ctx + 1), \
+                f"predictions {tuple(preds.shape)} != ({num_loops}, {x.shape[0]}, {k_ctx + 1})"
 
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
-            grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(),
-                                                       cfg.training.grad_clip)
+            # grad_clip <= 0 表示关闭裁剪；max_norm=inf 时不缩放，只返回范数
+            clip = cfg.training.grad_clip if cfg.training.grad_clip > 0 else float("inf")
+            grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), clip)
             optimizer.step()
             scheduler.step()
 
