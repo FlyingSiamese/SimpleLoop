@@ -60,19 +60,31 @@ def parameter_stats(model, title):
 
 
 @torch.no_grad()
-def evaluate(model, loader, device, num_loops):
-    """返回每一轮 loop 的 MSE 列表，长度 num_loops。"""
+def evaluate(model, loader, device, num_loops, loss_window):
+    """返回 (val_loss, query_mse_by_loop)。
+
+    val_loss 与训练目标同口径：k+1 个 prompt 前缀，取最后 loss_window 轮。
+    query_mse_by_loop 只统计最后一个 query 位置，用于画 mse_vs_loop。
+    两者同源同一次前向，不会错位。
+    """
     model.eval()
-    sq = torch.zeros(num_loops, dtype=torch.float64)
-    n = 0
+    sq_prefix = torch.zeros(num_loops, dtype=torch.float64)
+    sq_query = torch.zeros(num_loops, dtype=torch.float64)
+    n_prefix, n_query = 0, 0
     for x, y in loader:
         x, y = x.to(device), y.to(device)
-        preds = to_loop_predictions(model(x, y, num_loops=num_loops))  # [L, B]
-        target = y[:, -1].double()                                     # [B]
-        sq += ((preds.double() - target.unsqueeze(0)) ** 2).sum(dim=1).cpu()
-        n += x.shape[0]
+        preds = to_loop_predictions(
+            model(x, y, num_loops=num_loops, all_positions=True), ndim=3)  # [L, B, k+1]
+        sq_prefix += ((preds.double() - y.double().unsqueeze(0)) ** 2).sum(dim=(1, 2)).cpu()
+        n_prefix += x.shape[0] * y.shape[1]
+        # 最后一个前缀就是 query，与 model(...) 的 query 输出完全相同
+        sq_query += ((preds[:, :, -1].double()
+                      - y[:, -1].double().unsqueeze(0)) ** 2).sum(dim=1).cpu()
+        n_query += x.shape[0]
     model.train()
-    return (sq / n).tolist()
+    prefix_mse = (sq_prefix / n_prefix).tolist()
+    query_mse = (sq_query / n_query).tolist()
+    return sum(prefix_mse[num_loops - loss_window:]) / loss_window, query_mse
 
 
 def train(cfg, model, run_name, config_path, resume=None):
@@ -168,10 +180,10 @@ def train(cfg, model, run_name, config_path, resume=None):
                 running_loss, running_n, t0 = 0.0, 0, time.time()
 
             if step % cfg.training.eval_every == 0 or step >= cfg.training.max_steps:
-                val_mses = evaluate(model, val_loader, device, num_loops)
-                val_loss = sum(val_mses[num_loops - window:]) / window
+                val_loss, query_mses = evaluate(model, val_loader, device,
+                                                num_loops, window)
                 record = {"step": step, "val_loss": val_loss}
-                for i, mse in enumerate(val_mses, 1):
+                for i, mse in enumerate(query_mses, 1):
                     record[f"val_mse_loop_{i}"] = mse
                 logger.log(record)
                 if val_loss < best_val_loss:
