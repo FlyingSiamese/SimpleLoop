@@ -1,6 +1,6 @@
 """出图：从 metrics.jsonl / evaluation.json / ood.json / ablation.json 生成全部图。
 
-计划第 17、29、35 节。图内文字统一用英文，避免中文字体缺失。
+图内文字统一用英文，避免中文字体缺失。
 """
 
 import argparse
@@ -42,7 +42,7 @@ def save(fig, path):
 # ---------------------------------------------------------------- 训练曲线
 
 def plot_training_curves(rows, fig_dir):
-    """计划第 17 节 + 第 35 节的 gradient norm curve。"""
+    """Gradient norm 曲线。"""
     made = []
     train = [r for r in rows if "train_loss" in r]
     val = [r for r in rows if "val_loss" in r]
@@ -80,7 +80,7 @@ def plot_training_curves(rows, fig_dir):
 # ------------------------------------------------------- loop / context
 
 def plot_mse_vs_loop(ev, cfg, outputs, fig_dir):
-    """计划第 18 节：整个项目最核心的图。"""
+    """整个项目最核心的图：误差随 loop 迭代的变化。"""
     made = []
     mse = ev["mse_by_loop"]
     fig, ax = plt.subplots(figsize=(7, 4.5))

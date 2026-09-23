@@ -1,4 +1,4 @@
-"""ID 评测：loop 外推、context length、最小二乘基线（计划第 18~20 节）。"""
+"""ID 评测：loop 外推、context length、最小二乘基线。"""
 
 import argparse
 from pathlib import Path
@@ -83,7 +83,7 @@ def main():
     print(f"架构       : {arch}  参数量: {sum(p.numel() for p in model.parameters()):,}")
     print(f"测试样本   : {len(test)}  loop 数: {num_eval_loops}")
 
-    # ---- ID 测试 + loop 外推（计划第 18、19 节）----
+    # ---- ID 测试 + loop 外推 ----
     preds = predict_loops(model, test, num_eval_loops, device, args.batch_size)
     mse_by_loop = [((preds[t] - target) ** 2).mean().item() for t in range(num_eval_loops)]
     final_metrics = regression_metrics(preds[-1], target)
@@ -97,12 +97,12 @@ def main():
                               for i in range(min(4, num_eval_loops - t)))
             print(f"  {chunk}")
 
-    # ---- 最小二乘基线（计划第 12 节）----
+    # ---- 最小二乘基线 ----
     ls_pred, _ = least_squares_predict(test.x, test.y, k_total)
     ls_metrics = regression_metrics(ls_pred, target)
     print(f"\n最小二乘 MSE  : {ls_metrics['mse']:.3e}  R² {ls_metrics['r2']:.6f}")
 
-    # ---- context length（计划第 20 节）----
+    # ---- context length ----
     context_length = {}
     print("\ncontext length:")
     for k in cfg.evaluation.context_lengths:

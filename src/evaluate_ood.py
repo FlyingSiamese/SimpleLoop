@@ -1,4 +1,4 @@
-"""OOD 评测：输入尺度、斜协方差、带噪标签（计划第 21~23 节）。"""
+"""OOD 评测：输入尺度、斜协方差、带噪标签。"""
 
 import argparse
 from pathlib import Path

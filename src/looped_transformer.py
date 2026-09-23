@@ -64,7 +64,7 @@ class LoopedTransformer(nn.Module):
         else:
             H = P
 
-        # 计划第 27 节：前 b-T 轮不保留计算图
+        # 前 b-T 轮不保留计算图
         cut = num_loops - self.loss_window
 
         predictions = []

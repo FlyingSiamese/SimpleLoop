@@ -10,7 +10,7 @@ import torch
 
 
 def set_seed(seed):
-    """固定所有随机源（计划第 34 节）。"""
+    """固定所有随机源，保证可复现。"""
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -31,7 +31,7 @@ def git_commit():
 
 
 def environment_info():
-    """计划第 34 节要求记录的环境信息。"""
+    """记录训练环境，便于复现。"""
     return {
         "torch_version": torch.__version__,
         "cuda_version": torch.version.cuda,

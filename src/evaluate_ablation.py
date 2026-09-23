@@ -1,4 +1,4 @@
-"""消融实验汇总（计划第 24~26 节）。
+"""消融实验汇总：input injection / loop count / loss window。
 
 run 名统一取"配置文件名去掉 .yaml"，base 除外（它叫 main）。
 main 同时充当三组消融的对照点。

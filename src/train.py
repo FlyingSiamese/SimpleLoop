@@ -35,7 +35,7 @@ def make_optimizer(model, cfg):
 
 
 def make_scheduler(optimizer, cfg):
-    """线性 warmup -> cosine 衰减（计划第 14 节）。"""
+    """线性 warmup -> cosine 衰减。"""
     warmup = cfg.training.warmup_steps
     total = cfg.training.max_steps
 
@@ -49,7 +49,7 @@ def make_scheduler(optimizer, cfg):
 
 
 def parameter_stats(model, title):
-    """计划第 28 节：按模块统计参数量。"""
+    """按模块统计参数量。"""
     total = sum(p.numel() for p in model.parameters())
     print(f"[{title}] 总参数量: {total:,}")
     for name, child in model.named_children():
@@ -145,7 +145,7 @@ def train(cfg, model, run_name, config_path, resume=None):
 
             with torch.autocast(device_type=device.type, dtype=amp_dtype,
                                 enabled=use_bf16):
-                # 计划第 10 节：监督 k+1 个 prompt 前缀，target 就是整条 y
+                # 监督 k+1 个 prompt 前缀（论文 Eq.1），target 就是整条 y
                 preds = to_loop_predictions(model(
                     x, y, num_loops=num_loops,
                     truncated_bptt=cfg.loop.truncated_bptt,

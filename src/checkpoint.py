@@ -1,4 +1,4 @@
-"""Checkpoint 保存与恢复（计划第 33 节）。"""
+"""Checkpoint 保存与恢复。"""
 
 import random
 from pathlib import Path
