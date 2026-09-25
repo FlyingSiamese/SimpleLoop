@@ -161,23 +161,6 @@ def plot_ood(ood, fig_dir):
         ax.legend()
         made.append(save(fig, fig_dir / fname))
 
-    cov = ood["covariance"]
-    labels = list(cov.keys())
-    fig, ax = plt.subplots(figsize=(6, 4.5))
-    width = 0.35
-    xs = range(len(labels))
-    ax.bar([x - width / 2 for x in xs], [cov[l]["model_mse"] for l in labels],
-           width, label=ood["architecture"])
-    ax.bar([x + width / 2 for x in xs], [cov[l]["least_squares_mse"] for l in labels],
-           width, label="Least Squares")
-    ax.set_yscale("log")
-    ax.set_xticks(list(xs))
-    ax.set_xticklabels(labels)
-    ax.set_ylabel("test MSE (log scale)")
-    ax.set_title("OOD: skewed covariance")
-    ax.grid(alpha=0.3, axis="y")
-    ax.legend()
-    made.append(save(fig, fig_dir / "ood_covariance.png"))
     return made
 
 

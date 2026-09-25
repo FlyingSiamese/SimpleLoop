@@ -21,16 +21,6 @@
       "least_squares_mse": 9.585995192074037e-13
     }
   },
-  "covariance": {
-    "identity": {
-      "model_mse": 0.020212698727846146,
-      "least_squares_mse": 1.0750313128842642e-13
-    },
-    "skewed": {
-      "model_mse": 0.04591011628508568,
-      "least_squares_mse": 1.4411403656804794e-13
-    }
-  },
   "noise": {
     "0.0": {
       "model_mse": 0.020212698727846146,
