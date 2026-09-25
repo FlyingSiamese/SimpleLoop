@@ -41,5 +41,3 @@ training:
 evaluation:
   max_eval_loops: 32
   context_lengths: [1,2,4,8,16,32]
-  scaling_factors: [0.5,1.0,2.0,3.0]
-  noise_sigmas: [0.0,0.1,0.3,0.5]

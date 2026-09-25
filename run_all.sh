@@ -86,15 +86,6 @@ run_eval() {
             --checkpoint "$ckpt" --num-loops 8 \
             || FAILED+=("evaluate:main:8")
     fi
-    step "OOD 评测 $name"
-    python -u -m src.evaluate_ood --config src/configs/base.yaml --checkpoint "$ckpt" \
-        || FAILED+=("evaluate_ood:$name")
-    if [ "$name" = main ]; then
-        step "OOD 评测 main（训练轮数：8）"
-        python -u -m src.evaluate_ood --config src/configs/base.yaml \
-            --checkpoint "$ckpt" --num-loops 8 \
-            || FAILED+=("evaluate_ood:main:8")
-    fi
 }
 
 run_eval main     outputs/main/checkpoints/best.pt

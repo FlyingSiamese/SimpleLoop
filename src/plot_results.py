@@ -1,4 +1,4 @@
-"""出图：从 metrics.jsonl / evaluation.json / ood.json / ablation.json 生成全部图。
+"""出图：从 metrics.jsonl / evaluation.json / ablation.json 生成全部图。
 
 图内文字统一用英文，避免中文字体缺失。
 """
@@ -133,37 +133,6 @@ def plot_context_length(ev, fig_dir):
     return [save(fig, fig_dir / "mse_vs_context_length.png")]
 
 
-# ------------------------------------------------------------------- OOD
-
-def plot_ood(ood, fig_dir):
-    made = []
-    specs = [
-        ("scaling", "ood_scaling.png", "input scale s", True),
-        ("noise", "ood_noise.png", "context label noise sigma", False),
-    ]
-    for key, fname, xlabel, logx in specs:
-        data = ood[key]
-        xs = sorted(float(k) for k in data)
-        fig, ax = plt.subplots(figsize=(7, 4.5))
-        ax.plot(xs, [data[str(x) if str(x) in data else x]["model_mse"] for x in xs],
-                marker="o", linewidth=1.5, label=ood["architecture"])
-        ax.plot(xs, [data[str(x) if str(x) in data else x]["least_squares_mse"] for x in xs],
-                marker="s", **LS_STYLE)
-        ax.set_yscale("log")
-        if logx:
-            ax.set_xscale("log", base=2)
-            ax.set_xticks(xs)
-            ax.set_xticklabels([str(x) for x in xs])
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel("test MSE (log scale)")
-        ax.set_title(f"OOD: {xlabel}")
-        ax.grid(alpha=0.3)
-        ax.legend()
-        made.append(save(fig, fig_dir / fname))
-
-    return made
-
-
 # -------------------------------------------------------------- ablation
 
 def plot_ablation(abl, fig_dir):
@@ -228,12 +197,6 @@ def main():
         made += plot_context_length(ev, fig_dir)
     else:
         skipped.append("evaluation.json")
-
-    ood_path = run_dir / "ood.json"
-    if ood_path.exists():
-        made += plot_ood(load_json(ood_path), fig_dir)
-    else:
-        skipped.append("ood.json")
 
     abl_path = outputs / "ablation.json"
     if abl_path.exists():
