@@ -66,6 +66,7 @@ def main():
     parser.add_argument("--arch", default="auto", choices=["auto", "looped", "baseline"])
     parser.add_argument("--batch-size", type=int, default=512)
     parser.add_argument("--data-dir", default="data")
+    parser.add_argument("--num-loops", type=int, default=None)
     args = parser.parse_args()
 
     cfg = load_config(args.config)
@@ -77,7 +78,10 @@ def main():
     test = LinearRegressionDataset(test_path)
     k_total = test.k_total
     target = test.y[:, k_total]                                    # [N]，query 目标
-    num_eval_loops = cfg.evaluation.max_eval_loops if arch == "looped" else 1
+    num_eval_loops = (args.num_loops if args.num_loops is not None
+                      else cfg.evaluation.max_eval_loops) if arch == "looped" else 1
+    if num_eval_loops < 1:
+        parser.error("--num-loops 必须大于 0")
 
     print(f"checkpoint : {args.checkpoint}")
     print(f"架构       : {arch}  参数量: {sum(p.numel() for p in model.parameters()):,}")
@@ -114,6 +118,8 @@ def main():
         context_length[str(k)] = {"model_mse": model_mse, "least_squares_mse": ls_mse}
         print(f"  k={k:<3} model {model_mse:.6f}   最小二乘 {ls_mse:.3e}")
 
+    output_path = run_dir / ("evaluation.json" if num_eval_loops == cfg.evaluation.max_eval_loops
+                             or arch == "baseline" else f"evaluation_{num_eval_loops}.json")
     save_json({
         "run_name": run_dir.name,
         "architecture": arch,
@@ -124,8 +130,8 @@ def main():
         "metrics_at_final_loop": final_metrics,
         "least_squares": ls_metrics,
         "context_length": context_length,
-    }, run_dir / "evaluation.json")
-    print(f"\n已写入 {run_dir / 'evaluation.json'}")
+    }, output_path)
+    print(f"\n已写入 {output_path}")
 
 
 if __name__ == "__main__":
